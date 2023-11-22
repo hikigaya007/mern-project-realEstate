@@ -20,7 +20,7 @@ function Header() {
     <ul className='flex gap-4 '>
         <NavLink to='/'><li className='hidden sm:inline text-slate-700 hover:underline cursor-pointer'>Home</li></NavLink>
         <NavLink to='/about'><li className='hidden sm:inline text-slate-700 hover:underline cursor-pointer' >About</li></NavLink>
-        <NavLink to='/signup'><li className='hidden sm:inline text-slate-700 hover:underline cursor-pointer '>Sign In</li></NavLink>
+        <NavLink to='/signup'><li className='hidden sm:inline text-slate-700 hover:underline cursor-pointer '>Sign Up</li></NavLink>
     </ul>
         </div>
         
