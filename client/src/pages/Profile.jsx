@@ -1,16 +1,24 @@
 import React, { useRef, useState, useEffect } from 'react'
-import {useSelector} from 'react-redux'
+import {useSelector , useDispatch} from 'react-redux'
 import {getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage';
 import { app } from '../firebase';
+
+
+import { updateUserStart , updateUserSuccess , updateUserFailure } from '../redux/user/userSlice';
 function Profile() {
 
   const fileRef = useRef(null);
 
-  const {currentUser} = useSelector((state) => state.user)
+  const {currentUser , loading} = useSelector((state) => state.user);
 
   const [file , setFile] = useState(undefined);
 
   const [formData , setFormData] = useState({}); 
+
+
+  const dispatch = useDispatch();
+  
+
   
 
   const [fileUploadError , setFileUploadError] = useState(false);
@@ -50,23 +58,70 @@ function Profile() {
 
   };
 
+  const handleSubmit = async (e)=>{
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+
+      console.log("checking the user id",currentUser._id)
+      console.log(formData)
+
+      const res = await fetch(`/api/user/update/${currentUser._id}`,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      console.log(JSON.stringify(formData))
+
+      const data = await res.json();
+
+      console.log("this is the data test",data)
+
+      if(data.success ===false){
+        dispatch(updateUserFailure(data.message))
+        return;
+      }
+
+      dispatch(updateUserSuccess(data));
+
+    } catch (error) {
+      dispatch(updateUserFailure((error.message)))
+    }
+  }
+
+  const handleChange = (e)=>{
+    setFormData({...formData , [e.target.id] : e.target.value})
+  }
+
   return (
     <div className='p-3 max-w-lg m-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
-      <form className='flex flex-col gap-4'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
         <input onChange={ (e)=>setFile(e.target.files[0])} type="file" ref={fileRef} accept='image/*' hidden/>
         <img 
         onClick={() =>{fileRef.current.click()}}
         src={formData.avatar || currentUser.avatar} alt='profile' 
         className='rounded-full w-24 object-cover cursor-pointer self-center mt-2'/>
         {fileUploadError ? <p className='text-red-700 text-sm text-center'>Image Uploading failed...</p>: <div></div>  }
-        <input type="text" placeholder='Username' 
+        <input 
+        defaultValue={currentUser.username}
+        onChange={handleChange}
+        type="text" placeholder='Username' 
         className='border p-3 rounded-lg' id='username'/>
-        <input type="email" placeholder='Email' 
+        <input 
+        defaultValue={currentUser.email}
+        onChange={handleChange}
+        type="email" placeholder='Email' 
         className='border p-3 rounded-lg' id='email'/>
-        <input type="text" placeholder='Password' 
+        <input 
+        defaultValue={currentUser.passord}
+        onChange={handleChange}
+        type="text" placeholder='Password' 
         className='border p-3 rounded-lg' id='password'/>
-        <button className='bg-slate-700 text-white uppercase p-3 hover:opacity-95 rounded-lg'>Update</button>
+        <button className='bg-slate-700 text-white uppercase p-3 hover:opacity-95 rounded-lg'>{loading ?'Loading...':'Update'}</button>
 
       </form>
       <div className='flex justify-between mt-5'>
@@ -77,7 +132,7 @@ function Profile() {
   )
 }
 
-export default Profile
+export default Profile;
 
 // firebase storage =\
       // allow read;
