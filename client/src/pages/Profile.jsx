@@ -11,7 +11,7 @@ function Profile() {
   const [file , setFile] = useState(undefined);
 
   const [formData , setFormData] = useState({}); 
-  console.log(formData)
+  
 
   const [fileUploadError , setFileUploadError] = useState(false);
 
@@ -23,11 +23,15 @@ function Profile() {
   }, [file])
 
   const handleFileUpload = (file) =>{
-    const storage = getStorage(app);
-    const fileName = new Date().getTime() + file.name;
 
+    const storage = getStorage(app);
+
+    const fileName = new Date().getTime() + file.name;
+    
     const storageRef = ref(storage , fileName);
+
     const uploadTask = uploadBytesResumable(storageRef , file);
+
 
     uploadTask.on('state_changed',null /* if you need progress details  */,
     (error)=>{
