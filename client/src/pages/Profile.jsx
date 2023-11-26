@@ -4,7 +4,7 @@ import {getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/st
 import { app } from '../firebase';
 
 
-import { updateUserStart , updateUserSuccess , updateUserFailure } from '../redux/user/userSlice';
+import { updateUserStart , updateUserSuccess , updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice';
 function Profile() {
 
   const fileRef = useRef(null);
@@ -14,6 +14,9 @@ function Profile() {
   const [file , setFile] = useState(undefined);
 
   const [formData , setFormData] = useState({}); 
+
+
+  const [userDeleteError , setUserDeleteError] = useState(false);
 
 
   const dispatch = useDispatch();
@@ -92,6 +95,37 @@ function Profile() {
     }
   }
 
+  const handleDelete = async () =>{
+
+
+    try {
+      dispatch(deleteUserStart());
+
+      const res = await fetch(`api/user/delete/${currentUser._id}`,{
+        method :'DELETE'
+      });
+
+      const data = await res.json();
+
+      console.log("checking delete" , data)
+
+      if(data.success === false){
+        dispatch(deleteUserFailure(data.message));
+        setUserDeleteError(true);
+        return ; 
+      }
+
+      dispatch(deleteUserSuccess(data));
+      setUserDeleteError(false)
+
+    } catch (error) {
+        dispatch(deleteUserFailure(error.message));
+        setUserDeleteError(true);
+
+      
+    }
+  }
+
   const handleChange = (e)=>{
     setFormData({...formData , [e.target.id] : e.target.value})
   }
@@ -125,9 +159,12 @@ function Profile() {
 
       </form>
       <div className='flex justify-between mt-5'>
-        <span className='text-red-700 cursor-pointer '>Delete account</span>
+        <span 
+        onClick={handleDelete}
+        className='text-red-700 cursor-pointer '>Delete account</span>
         <span className='text-red-700 cursor-pointer '>Sign Out</span>
       </div>
+      {userDeleteError ? <p className='text-center text-red-700 text-sm pt-4'>Something happened could not delete the account</p>:  <div></div>  }
     </div>
   )
 }
