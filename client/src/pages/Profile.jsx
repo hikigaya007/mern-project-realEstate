@@ -3,8 +3,8 @@ import {useSelector , useDispatch} from 'react-redux'
 import {getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage';
 import { app } from '../firebase';
 
+import { updateUserStart , updateUserSuccess , updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, logoutUserStart, logoutUserFailure, logoutUserSuccess } from '../redux/user/userSlice';
 
-import { updateUserStart , updateUserSuccess , updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess } from '../redux/user/userSlice';
 function Profile() {
 
   const fileRef = useRef(null);
@@ -126,6 +126,22 @@ function Profile() {
     }
   }
 
+  const handleSignout = async () => {
+    try {
+      dispatch(logoutUserStart());
+      const res = await fetch('/api/auth/signout')
+      const data = await res.json();
+
+      if(data.success === false){
+        dispatch(logoutUserFailure(data.message))
+        return ;
+      }
+      dispatch(logoutUserSuccess());
+    } catch (error) {
+      dispatch(logoutUserFailure(error));
+    }
+  } 
+
   const handleChange = (e)=>{
     setFormData({...formData , [e.target.id] : e.target.value})
   }
@@ -162,7 +178,9 @@ function Profile() {
         <span 
         onClick={handleDelete}
         className='text-red-700 cursor-pointer '>Delete account</span>
-        <span className='text-red-700 cursor-pointer '>Sign Out</span>
+        <span 
+        onClick={handleSignout}
+        className='text-red-700 cursor-pointer '>Sign Out</span>
       </div>
       {userDeleteError ? <p className='text-center text-red-700 text-sm pt-4'>Something happened could not delete the account</p>:  <div></div>  }
     </div>
