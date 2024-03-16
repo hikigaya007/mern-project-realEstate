@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react'
 import {useSelector , useDispatch} from 'react-redux'
 import {getDownloadURL, getStorage, ref, uploadBytesResumable} from 'firebase/storage';
 import { app } from '../firebase';
+import {Link} from 'react-router-dom'
 
 import { updateUserStart , updateUserSuccess , updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, logoutUserStart, logoutUserFailure, logoutUserSuccess } from '../redux/user/userSlice';
 
@@ -172,6 +173,9 @@ function Profile() {
         type="text" placeholder='Password' 
         className='border p-3 rounded-lg' id='password'/>
         <button className='bg-slate-700 text-white uppercase p-3 hover:opacity-95 rounded-lg'>{loading ?'Loading...':'Update'}</button>
+        <Link className='bg-green-700 text-white rounded-lg p-3 text-center uppercase hover:opacity-70' to={'/add-property'}>
+          Add Property
+        </Link>
 
       </form>
       <div className='flex justify-between mt-5'>
