@@ -170,6 +170,29 @@ function Profile() {
     }
   }
 
+  const handleDeleteListing = async(id) => {
+
+    try {
+      
+      const res = await fetch(`/api/listing/delete/${id}` , {
+        method: 'DELETE',
+      });
+
+      const data = res.json();
+
+      if(data.success === false){
+        console.log(data.message)
+        return ;
+      }
+
+      setUserListing((prev) => prev.filter((listing) => listing._id !== id))
+
+    } catch (error) {
+      console.log(error.message)
+    }
+
+  }
+
 
 
   return (
@@ -214,16 +237,32 @@ function Profile() {
       {userDeleteError ? <p className='text-center text-red-700 text-sm pt-4'>Something happened could not delete the account</p>:  <div></div>  }
       <button className='text-green-700 w-full'
       onClick={handleShowListing}
-      >Show Listing</button>
+      >Show Added Property 🔽</button>
       <p className='text-red-700 mt-5'>{listingError ? "Error Showing Listing" : ""}</p>
 
     {userListing && userListing.length > 0 &&
     userListing.map((listing) => {
       return(
-        <div className=''  key={listing._id}>
-          <link to={`/listing/${listing._id}`}>
-            <img src={listing.imageURLs[0]} alt="listing cover" />
-          </link>
+        <div className='flex border rounded-lg  gap-4 p-3 justify-between items-center'  key={listing._id}>
+          <Link to={`/listing/${listing._id}`}>
+            <img 
+            className='h-16 w-16 object-contain rounded-lg'
+            src={listing.imageURLs[0]} alt="listing cover" />
+          </Link>
+          <Link 
+          className='text-slate-700 font-semibold  flex-1 hover:underline truncate' to={`/listing/${listing._id}`}>
+            <p >{listing.name}</p>
+          </Link>
+          <div className='flex flex-col items-center'>
+            <button className='text-green-700 uppercase'>
+              <Link to={`/update-listing/${listing._id}`}>
+                Edit
+              </Link>
+            </button>
+            <button 
+            onClick={() => handleDeleteListing(listing._id)}
+            className='text-red-700 uppercase'>Delete</button>
+          </div>
         </div>
       )
     })
@@ -235,8 +274,3 @@ function Profile() {
 
 export default Profile;
 
-// firebase storage =\
-      // allow read;
-      // allow write: if
-      // request.resource.size < 2 * 1024 * 1024 &&
-      // request.resource.contentType.matches('image/.*');

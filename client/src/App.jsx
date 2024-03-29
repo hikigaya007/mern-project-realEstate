@@ -8,6 +8,7 @@ import Profile from './pages/Profile'
 import Header from './components/Header'
 import PrivateRoute from './components/PrivateRoute'
 import CreateProperty from './pages/CreateProperty'
+import UpdateListing from './pages/UpdateListing'
 
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
         <Route element={<PrivateRoute/>}>
           <Route exact path='/profile' element = {<Profile/>}></Route> 
           <Route exact path='/add-property' element = {<CreateProperty/>}></Route> 
+          <Route exact path='/update-listing/:listingId' element = {<UpdateListing/>}></Route> 
         </Route>
         <Route exact path='/signin' element = {<SignIn/>}></Route>
         <Route exact path='/signup' element = {<SignUp/>}></Route>
