@@ -9,6 +9,7 @@ import Header from './components/Header'
 import PrivateRoute from './components/PrivateRoute'
 import CreateProperty from './pages/CreateProperty'
 
+
 export default function App() {
   return (
     <BrowserRouter>
