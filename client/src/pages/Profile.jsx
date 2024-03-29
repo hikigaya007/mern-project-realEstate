@@ -19,6 +19,10 @@ function Profile() {
 
   const [userDeleteError , setUserDeleteError] = useState(false);
 
+  const [listingError , setListingError] = useState(false);
+
+  const [userListing , setUserListing] = useState([])
+
 
   const dispatch = useDispatch();
   
@@ -147,6 +151,27 @@ function Profile() {
     setFormData({...formData , [e.target.id] : e.target.value})
   }
 
+  const handleShowListing = async() => {
+    try {
+      setListingError(false);
+      const res = await fetch(`api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+
+      console.log(data)
+
+      if(data.success === false){
+        setListingError(true);
+        return;
+      }
+      setUserListing(data);
+
+    } catch (error) {
+      setListingError(true);
+    }
+  }
+
+
+
   return (
     <div className='p-3 max-w-lg m-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -187,6 +212,23 @@ function Profile() {
         className='text-red-700 cursor-pointer '>Sign Out</span>
       </div>
       {userDeleteError ? <p className='text-center text-red-700 text-sm pt-4'>Something happened could not delete the account</p>:  <div></div>  }
+      <button className='text-green-700 w-full'
+      onClick={handleShowListing}
+      >Show Listing</button>
+      <p className='text-red-700 mt-5'>{listingError ? "Error Showing Listing" : ""}</p>
+
+    {userListing && userListing.length > 0 &&
+    userListing.map((listing) => {
+      return(
+        <div className=''  key={listing._id}>
+          <link to={`/listing/${listing._id}`}>
+            <img src={listing.imageURLs[0]} alt="listing cover" />
+          </link>
+        </div>
+      )
+    })
+    }
+
     </div>
   )
 }

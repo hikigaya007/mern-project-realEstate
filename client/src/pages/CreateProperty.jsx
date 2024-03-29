@@ -1,8 +1,15 @@
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import React, { useState } from 'react'
 import { app } from '../firebase';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 function CreateProperty() {
+
+    const {currentUser} = useSelector((state) => state.user)
+
+    const  navigate = useNavigate();
+    
 
     const [files , setFiles] = useState([]);
     const [formData , setFormData] = useState({
@@ -25,6 +32,10 @@ function CreateProperty() {
     const[uploading , setUploading] = useState(false);
 
     const [imageUploadError , setImageUploadError ] = useState(false);
+
+    const [error , setError] = useState(false)
+
+    const [loading , setLoading] = useState(false)
     
     
     const handleImageSubmit = () => {
@@ -109,6 +120,37 @@ function CreateProperty() {
       };
       
 
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+          if (formData.imageURLs.length < 1)
+            return setError('You must upload at least one image');
+          if (+formData.regularPrice < +formData.discountedPrice)
+            return setError('Discount price must be lower than regular price');
+          setLoading(true);
+          setError(false);
+          const res = await fetch('/api/listing/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              ...formData,
+              userRef: currentUser._id,
+            }),
+          });
+          const data = await res.json();
+          setLoading(false);
+          if (data.success === false) {
+            setError(data.message);
+          }
+          navigate(`/listing/${data._id}`);
+        } catch (error) {
+          setError(error.message);
+          setLoading(false);
+        }
+      };
+
     
 
 
@@ -182,7 +224,9 @@ function CreateProperty() {
                     <div className='flex items-center gap-2'>
                         <input 
                         onChange={(e) => setFormData({...formData , regularPrice: e.target.value})}
-                        type="number" id='regularPrice' min='1'
+                        type="number"
+                        value={formData.regularPrice}
+                        id='regularPrice' min='1'
                         className='p-3 border w-24 border-gray-300 rounded-lg' />
                         <div className='flex flex-col items-center'>
                             <p>Regular Price</p>
@@ -190,16 +234,18 @@ function CreateProperty() {
                         </div>
                         
                     </div>
+                    {formData.offer && 
                     <div className='flex items-center gap-2'>
-                        <input type="number" 
+                        <input type="number"
+                        value={formData.discountedPrice} 
                         onChange={(e) => setFormData({...formData , discountedPrice: e.target.value})}
-                        id='discountPrice' min='1'
+                        id='discountPrice' min='0'
                         className='p-3 border w-24 border-gray-300 rounded-lg' />
                         <div className='flex flex-col items-center'>
                             <p>Discounted Price</p>
                             <span className='text-sm'>{"$ / month"}</span>
                         </div>
-                    </div>
+                    </div>}
                 </div>
             </div>
             <div className='flex flex-col flex-1 gap-4'>
@@ -231,8 +277,12 @@ function CreateProperty() {
                         </div>
                     )
                 })}
-                <button className='p-3 bg-slate-700 text-white rounded-lg uppercase
-                hover:opacity-90 disabled:opacity-80'>Add Property</button>
+                <button
+                disabled={loading || uploading}
+                onClick={handleSubmit}
+                className='p-3 bg-slate-700 text-white rounded-lg uppercase
+                hover:opacity-90 disabled:opacity-80'>{loading?"Adding...": "Add Property"}</button>
+                {error && <p className='text-red-700 text-sm'>{error}</p>}
             </div>
         
             
