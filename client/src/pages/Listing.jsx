@@ -78,7 +78,7 @@ function Listing() {
           {property.imageURLs.map((url) => {
             return(
               <SwiperSlide key={url}>
-                <div className='h-[500px]' style={{background: `url(${url}) center no-repeat`}}>
+                <div className='h-[500px]' style={{background: `url(${url}) center no-repeat` ,backgroundSize: 'cover' }}>
                 </div>
               </SwiperSlide>
             )
